@@ -15,7 +15,7 @@ $userId = isset($_REQUEST['user_id']) ? $_REQUEST['user_id'] : null;
 if ($type == 'personal' || $type == 'admin') {
     $cidReset = true; // fixes #5162
 }
-require_once __DIR__.'/../inc/global.inc.php';
+require_once '../inc/global.inc.php';
 
 $current_course_tool = TOOL_CALENDAR_EVENT;
 $this_section = SECTION_MYAGENDA;
@@ -24,7 +24,6 @@ $htmlHeadXtra[] = api_get_jquery_libraries_js(array('jquery-ui', 'jquery-ui-i18n
 
 $htmlHeadXtra[] = api_get_asset('qtip2/jquery.qtip.min.js');
 $htmlHeadXtra[] = api_get_asset('fullcalendar/dist/fullcalendar.js');
-$htmlHeadXtra[] = api_get_asset('fullcalendar/dist/locale-all.js');
 $htmlHeadXtra[] = api_get_asset('fullcalendar/dist/gcal.js');
 $htmlHeadXtra[] = api_get_css_asset('fullcalendar/dist/fullcalendar.min.css');
 $htmlHeadXtra[] = api_get_css_asset('qtip2/jquery.qtip.min.css');
@@ -46,12 +45,12 @@ if (isset($_REQUEST['cidReq']) && !empty($_REQUEST['cidReq'])) {
 
 api_protect_course_group(GroupManager::GROUP_TOOL_CALENDAR);
 
-$agenda = new Agenda($type);
+$agenda = new Agenda();
+$agenda->type = $type;
 
 $is_group_tutor = false;
 $session_id = api_get_session_id();
 $group_id = api_get_group_id();
-$courseId = api_get_course_int_id();
 
 if (!empty($group_id)) {
     $group_properties = GroupManager::get_group_properties($group_id);
@@ -81,10 +80,14 @@ switch ($type) {
         break;
     case 'course':
         api_protect_course_script(true);
-        $allowToEdit = $agenda->getIsAllowedToEdit();
         $this_section = SECTION_COURSES;
-        if ($allowToEdit) {
+        if (api_is_allowed_to_edit()) {
             $can_add_events = 1;
+        }
+        if (!empty($group_id)) {
+            if ($is_group_tutor) {
+                $can_add_events = 1;
+            }
         }
         break;
     case 'personal':
@@ -110,13 +113,13 @@ switch ($type) {
 }
 
 //Setting translations
-/*$day_short = api_get_week_days_short();
+$day_short = api_get_week_days_short();
 $days = api_get_week_days_long();
 $months = api_get_months_long();
-$months_short = api_get_months_short();*/
+$months_short = api_get_months_short();
 
 //Setting calendar translations
-/*$tpl->assign('month_names', json_encode($months));
+$tpl->assign('month_names', json_encode($months));
 $tpl->assign('month_names_short', json_encode($months_short));
 $tpl->assign('day_names', json_encode($days));
 $tpl->assign('day_names_short', json_encode($day_short));
@@ -128,11 +131,11 @@ $tpl->assign(
         'week' => get_lang('Week'),
         'day' => get_lang('Day')
     ))
-);*/
+);
 
 //see http://docs.jquery.com/UI/Datepicker/$.datepicker.formatDate
 
-$tpl->assign('js_format_date', 'll');
+$tpl->assign('js_format_date', 'lll');
 $region_value = api_get_language_isocode();
 
 if ($region_value == 'en') {
@@ -190,15 +193,12 @@ if (!empty($userId)) {
     $agenda_ajax_url = api_get_path(WEB_AJAX_PATH).'agenda.ajax.php?type='.$type;
 }
 
-if ($type == 'course' && !empty($courseId)) {
-    $agenda_ajax_url .= '&'.api_get_cidreq();
-}
-
 if (isset($_GET['session_id'])) {
     $agenda_ajax_url .= '&session_id='.intval($_GET['session_id']);
 }
 
 $tpl->assign('web_agenda_ajax_url', $agenda_ajax_url);
+$course_code = api_get_course_id();
 
 $form = new FormValidator(
     'form',

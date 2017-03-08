@@ -4,50 +4,50 @@
 use ChamiloSession as Session;
 
 /**
- *	Exercise administration
- * 	This script allows to manage (create, modify) an exercise and its questions
+ *  Exercise administration
+ *  This script allows to manage (create, modify) an exercise and its questions
  *
- *	 Following scripts are includes for a best code understanding :
+ *   Following scripts are includes for a best code understanding :
  *
- * 	- exercise.class.php : for the creation of an Exercise object
- * 	- question.class.php : for the creation of a Question object
- * 	- answer.class.php : for the creation of an Answer object
- * 	- exercise.lib.php : functions used in the exercise tool
- * 	- exercise_admin.inc.php : management of the exercise
- * 	- question_admin.inc.php : management of a question (statement & answers)
- * 	- statement_admin.inc.php : management of a statement
- * 	- question_list_admin.inc.php : management of the question list
+ *  - exercise.class.php : for the creation of an Exercise object
+ *  - question.class.php : for the creation of a Question object
+ *  - answer.class.php : for the creation of an Answer object
+ *  - exercise.lib.php : functions used in the exercise tool
+ *  - exercise_admin.inc.php : management of the exercise
+ *  - question_admin.inc.php : management of a question (statement & answers)
+ *  - statement_admin.inc.php : management of a statement
+ *  - question_list_admin.inc.php : management of the question list
  *
- * 	Main variables used in this script :
+ *  Main variables used in this script :
  *
- * 	- $is_allowedToEdit : set to 1 if the user is allowed to manage the exercise
- * 	- $objExercise : exercise object
- * 	- $objQuestion : question object
- * 	- $objAnswer : answer object
- * 	- $aType : array with answer types
- * 	- $exerciseId : the exercise ID
- * 	- $picturePath : the path of question pictures
- * 	- $newQuestion : ask to create a new question
- * 	- $modifyQuestion : ID of the question to modify
- * 	- $editQuestion : ID of the question to edit
- * 	- $submitQuestion : ask to save question modifications
- * 	- $cancelQuestion : ask to cancel question modifications
- * 	- $deleteQuestion : ID of the question to delete
- * 	- $moveUp : ID of the question to move up
- * 	- $moveDown : ID of the question to move down
- * 	- $modifyExercise : ID of the exercise to modify
- * 	- $submitExercise : ask to save exercise modifications
- * 	- $cancelExercise : ask to cancel exercise modifications
- * 	- $modifyAnswers : ID of the question which we want to modify answers for
- * 	- $cancelAnswers : ask to cancel answer modifications
- * 	- $buttonBack : ask to go back to the previous page in answers of type "Fill in blanks"
+ *  - $is_allowedToEdit : set to 1 if the user is allowed to manage the exercise
+ *  - $objExercise : exercise object
+ *  - $objQuestion : question object
+ *  - $objAnswer : answer object
+ *  - $aType : array with answer types
+ *  - $exerciseId : the exercise ID
+ *  - $picturePath : the path of question pictures
+ *  - $newQuestion : ask to create a new question
+ *  - $modifyQuestion : ID of the question to modify
+ *  - $editQuestion : ID of the question to edit
+ *  - $submitQuestion : ask to save question modifications
+ *  - $cancelQuestion : ask to cancel question modifications
+ *  - $deleteQuestion : ID of the question to delete
+ *  - $moveUp : ID of the question to move up
+ *  - $moveDown : ID of the question to move down
+ *  - $modifyExercise : ID of the exercise to modify
+ *  - $submitExercise : ask to save exercise modifications
+ *  - $cancelExercise : ask to cancel exercise modifications
+ *  - $modifyAnswers : ID of the question which we want to modify answers for
+ *  - $cancelAnswers : ask to cancel answer modifications
+ *  - $buttonBack : ask to go back to the previous page in answers of type "Fill in blanks"
  *
- *	@package chamilo.exercise
- * 	@author Olivier Brouckaert
+ *  @package chamilo.exercise
+ *  @author Olivier Brouckaert
  * Modified by Hubert Borderiou 21-10-2011 Question by category
  */
 
-require_once __DIR__.'/../inc/global.inc.php';
+require_once '../inc/global.inc.php';
 $current_course_tool  = TOOL_QUIZ;
 $this_section = SECTION_COURSES;
 
@@ -260,7 +260,7 @@ if (!empty($clone_question) && !empty($objExercise->id)) {
     // This should be moved to the duplicate function
     $new_answer_obj = new Answer($clone_question);
     $new_answer_obj->read();
-    $new_answer_obj->duplicate($new_question_obj);
+    $new_answer_obj->duplicate($new_id);
 
     //Reloading tne $objExercise obj
     $objExercise->read($objExercise->id);
@@ -282,7 +282,7 @@ if ($editQuestion || $modifyQuestion || $newQuestion || $modifyAnswers) {
 }
 
 if (isset($_SESSION['gradebook'])){
-    $gradebook=	$_SESSION['gradebook'];
+    $gradebook= $_SESSION['gradebook'];
 }
 
 if (!empty($gradebook) && $gradebook=='view') {
@@ -309,7 +309,7 @@ if (!$exerciseId && $nameTools != get_lang('ExerciseManagement')){
 
 // if the question is duplicated, disable the link of tool name
 if ($modifyIn == 'thisExercise') {
-    if($buttonBack)	{
+    if($buttonBack) {
         $modifyIn='allExercises';
     } else {
         $noPHP_SELF=true;
@@ -392,14 +392,7 @@ if ($inATest) {
     }
 
     echo '</div>';
-    echo '<div class="alert alert-info">'.
-        sprintf(get_lang('XQuestionsWithTotalScoreY'), $objExercise->selectNbrQuestions(), $maxScoreAllQuestions);
-    if ($objExercise->random > 0) {
-        echo '<br />' .
-            sprintf(get_lang('OnlyXQuestionsPickedRandomly'), $objExercise->random);
-    }
-    echo '</div>';
-
+    echo '<div class="alert alert-info">'.sprintf(get_lang('XQuestionsWithTotalScoreY'), $objExercise->selectNbrQuestions(), $maxScoreAllQuestions).'</div>';
 } else if (isset($_GET['newQuestion'])) {
     // we are in create a new question from question pool not in a test
     echo '<div class="actions">';
@@ -434,6 +427,7 @@ if ($newQuestion || $editQuestion) {
     if ($editQuestion) {
         // Question preview if teacher clicked the "switch to student"
         if ($studentViewActive && $is_allowedToEdit) {
+
             echo '<div class="main-question">';
             echo Display::div($objQuestion->selectTitle(), array('class' => 'question_title'));
             ExerciseLib::showQuestion(
@@ -450,9 +444,14 @@ if ($newQuestion || $editQuestion) {
             );
             echo '</div>';
         } else {
+             if ((!$studentViewActive) && $is_allowedToEdit)  { // not in student mode and can modify question...
+               $objExercise->edit_exercise_in_lp = true;
+               }
+
             require 'question_admin.inc.php';
         }
     }
+
 }
 
 if (isset($_GET['hotspotadmin'])) {
@@ -460,7 +459,6 @@ if (isset($_GET['hotspotadmin'])) {
         $objQuestion = Question :: read($_GET['hotspotadmin']);
     }
     if (!$objQuestion) {
-        api_not_allowed();
     }
     require 'hotspot_admin.inc.php';
 }

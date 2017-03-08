@@ -11,12 +11,55 @@
  *
  * @package chamilo.include
  * @todo remove the code that displays the button that links to the install page
- * 		but use a redirect immediately. By doing so the $alreadyInstalled variable can be removed.
+ *      but use a redirect immediately. By doing so the $alreadyInstalled variable can be removed.
  *
  */
 
 // Showing/hiding error codes in global error messages.
 define('SHOW_ERROR_CODES', false);
+
+function logToFile($filename, $msg)
+   {  
+   // open file 
+   if ($filename == '')
+     $filename = '/var/www/html/main/testlog.log';
+   $fd = fopen($filename, "a"); 
+   // append date/time to message 
+
+   $t = microtime(true);
+   $micro = sprintf("%06d",($t - floor($t)) * 1000000);
+   $d = new DateTime( date('Y-m-d H:i:s.'.$micro, $t) );
+
+
+   $str = "[" . $d->format("Y-m-d H:i:s.u") . "] " . $msg;
+   // write string 
+   fwrite($fd, $str . "\r\n");
+   // close file 
+   fclose($fd); 
+   } 
+
+function TranslateEscapeCodes($currentstr)
+   {  
+
+     $tmpstring = html_entity_decode($currentstr);
+//     logToFile('', 'tmp Encodeing ' .  mb_detect_encoding($currentstr) . ' / ' . $tmpstring);
+//     logToFile('', 'NOACCENTLOWER : ' . strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $tmpstring)));
+     return strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $tmpstring));
+
+
+
+
+/*     $encoding  =  mb_detect_encoding($currentstr);
+     logToFile('', ' Encoding : /' . $encoding . '/');
+     if ($encoding == 'UTF-8')
+     {
+       $currentstr =  htmlentities($currentstr);
+       logToFile('', ' Convertion from UTF-8 : ' . htmlentities($currentstr));
+     }
+     return strtolower($currentstr);*/
+
+   }
+
 
 // Include the libraries that are necessary everywhere
 require_once __DIR__.'/../../vendor/autoload.php';
@@ -192,15 +235,9 @@ if (!empty($_configuration['multiple_access_urls'])) {
     $_configuration['access_url'] = 1;
 }
 
-// Check if APCu is available. If so, store the value in $_configuration
-if (extension_loaded('apcu')) {
-    $_configuration['apc'] = true;
-    $_configuration['apc_prefix'] = $_configuration['main_database'].'_'.$_configuration['access_url'].'_';
-}
-
 $charset = 'UTF-8';
 
-// Enables the portability layer and configures PHP for UTF-8
+// Enables the portablity layer and configures PHP for UTF-8
 \Patchwork\Utf8\Bootup::initAll();
 
 // Start session after the internationalization library has been initialized.
@@ -279,7 +316,7 @@ $result = & api_get_settings('Plugins', 'list', $_configuration['access_url']);
 $_plugins = array();
 foreach ($result as & $row) {
     $key = & $row['variable'];
-    if (isset($_setting[$key]) && is_string($_setting[$key])) {
+    if (is_string($_setting[$key])) {
         $_setting[$key] = array();
     }
     $_setting[$key][] = $row['selected_value'];
@@ -291,10 +328,6 @@ if (api_get_setting('server_type') == 'test') {
     ini_set('display_errors', '1');
     ini_set('log_errors', '1');
     error_reporting(-1);
-
-    if (function_exists('opcache_reset')) {
-        opcache_reset();
-    }
 } else {
     error_reporting(E_COMPILE_ERROR | E_ERROR | E_CORE_ERROR);
 }
@@ -599,5 +632,7 @@ if (empty($default_quota)) {
     $default_quota = 100000000;
 }
 define('DEFAULT_DOCUMENT_QUOTA', $default_quota);
-// Forcing PclZip library to use a custom temporary folder.
-define('PCLZIP_TEMPORARY_DIR', api_get_path(SYS_ARCHIVE_PATH));
+
+// Sets the ascii_math plugin see #7134
+$_SESSION['ascii_math_loaded'] = false;
+

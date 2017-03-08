@@ -942,9 +942,9 @@ class GroupManager
         $group_user_table = Database :: get_course_table(TABLE_GROUP_USER);
         $sql = 'SELECT COUNT(gu.group_id) AS current_max
                 FROM '.$group_user_table.' gu, '.$group_table.' g
-				WHERE g.c_id = '.$course_info['real_id'].'
-				AND gu.c_id = g.c_id
-				AND gu.group_id = g.iid ';
+                WHERE g.c_id = '.$course_info['real_id'].'
+                AND gu.c_id = g.c_id
+                AND gu.group_id = g.iid ';
         if ($category_id != null) {
             $category_id = intval($category_id);
             $sql .= ' AND g.category_id = '.$category_id;
@@ -1165,6 +1165,9 @@ class GroupManager
     {
         $result = array();
         $tbl_group_user = Database::get_course_table(TABLE_GROUP_USER);
+        $tbl_group_info = Database::get_course_table(TABLE_GROUP);
+
+
         $course_id = api_get_course_int_id();
 
         $groups = array_map('intval', $groups);
@@ -1172,12 +1175,22 @@ class GroupManager
         $groups = implode(', ', $groups);
         $sql = "SELECT DISTINCT user_id
                 FROM $tbl_group_user gu
-                WHERE c_id = $course_id AND gu.group_id IN ($groups)";
+                inner join $tbl_group_info gi on (gu.c_id = gi.c_id and (gu.group_id = gi.id or gu.group_id = gi.iid))
+                WHERE gu.c_id = $course_id AND (gi.id IN ($groups) or gi.iid IN ($groups))";
+
+// Francois Belisle Kezber
+// Old request is under... Seems that the iid is now = to the id, but it did not follow with the update to 1.11
+// so we added a fail safe to check both id and iid
+
+//        $sql = "SELECT DISTINCT user_id
+//                FROM $tbl_group_user gu
+//                WHERE c_id = $course_id AND gu.group_id IN ($groups)";
+
         $rs = Database::query($sql);
         while ($row = Database::fetch_array($rs)) {
             $result[] = $row['user_id'];
         }
-
+    error_log($sql);
         return $result;
     }
 
@@ -2152,6 +2165,9 @@ class GroupManager
 
                 $group_name = '<a class="'.$groupNameClass.'" href="group_space.php?'.api_get_cidreq(true, false).'&gidReq='.$this_group['id'].'">'.
                     Security::remove_XSS($this_group['name']).'</a> ';
+        $group_name2 = '<a href="suivi_group_space.php?cidReq='.api_get_course_id().'&amp;origin='.$orig.'&amp;gidReq='.$this_group['id'].'">
+                                '.get_lang('suivi_de').''.stripslashes($this_group['name']).'</a>';
+
                 if (!empty($user_id) && !empty($this_group['id_tutor']) && $user_id == $this_group['id_tutor']) {
                     $group_name .= Display::label(get_lang('OneMyGroups'), 'success');
                 } elseif ($isMember) {
@@ -2163,6 +2179,7 @@ class GroupManager
                 }
                 $group_name .= $session_img;
                 $row[] = $group_name.'<br />'.stripslashes(trim($this_group['description']));
+        $row[] = $group_name2.'<br />'.stripslashes(trim($this_group['description']));
             } else {
                 if ($hideGroup === 'true') {
                     continue;
@@ -2276,6 +2293,7 @@ class GroupManager
             $table->set_header($column++, '', false);
         }
         $table->set_header($column++, get_lang('Groups'));
+    $table->set_header($column++,get_lang('SuiviGroup'));
         $table->set_header($column++, get_lang('GroupTutor'));
         $table->set_header($column++, get_lang('Registered'), false);
 

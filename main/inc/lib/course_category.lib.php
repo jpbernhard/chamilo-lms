@@ -11,6 +11,8 @@ class CourseCategory
      * @param int $categoryId The category ID
      * @return array
      */
+
+
     public static function getCategoryById($categoryId)
     {
         $tbl_category = Database::get_main_table(TABLE_MAIN_CATEGORY);
@@ -525,17 +527,34 @@ class CourseCategory
      */
     public static function browseCourseCategories()
     {
+
         $tbl_category = Database::get_main_table(TABLE_MAIN_CATEGORY);
         $conditions = null;
 
         $table = Database::get_main_table(TABLE_MAIN_ACCESS_URL_REL_COURSE_CATEGORY);
-        $conditions = " INNER JOIN $table a ON (c.id = a.course_category_id)";
+        $conditions = " INNER JOIN $table a ON (cc.id = a.course_category_id)";
         $whereCondition = " WHERE a.access_url_id = ".api_get_current_access_url_id();
 
-        $sql = "SELECT c.* FROM $tbl_category c
-                $conditions
-                $whereCondition
-                ORDER BY tree_pos ASC";
+        /* added by Francois Belisle KezberInc to make the count right away... (not in the get count function)      */
+         $conditions .=  ' left join course c ' .
+                         ' on c.category_code = cc.code ' .
+                         " and visibility != '0' AND " .
+                         " visibility != '4' " ;
+         $groupby =  " group by cc.id, cc.name, cc.code, cc.parent_id, cc.tree_pos, cc.children_count, cc.auth_course_child, cc.auth_cat_child ";
+        /* end Francois Belisle */
+
+
+        $sql = "SELECT cc.id, cc.name, cc.code, cc.parent_id, cc.tree_pos, cc.children_count, cc.auth_course_child, cc.auth_cat_child " ;
+        $sql .= ", count(c.category_code) as count_courses     ";
+        $sql .= " from $tbl_category cc ";
+        $sql .= $conditions  ;
+        $sql .= $whereCondition;
+
+        /* Francois Belisle Kezber Inc. */
+         $sql.= $groupby;
+
+        $sql .= " ORDER BY tree_pos ASC";
+//        die($sql);
         $result = Database::query($sql);
         $url_access_id = 1;
         if (api_is_multiple_url_enabled()) {
@@ -555,8 +574,8 @@ class CourseCategory
         );
 
         while ($row = Database::fetch_array($result)) {
-            $count_courses = self::countCoursesInCategory($row['code']);
-            $row['count_courses'] = $count_courses;
+//            $count_courses = 0; self::countCoursesInCategory($row['code']);
+//            $row['count_courses'] = $count_courses;
             if (!isset($row['parent_id'])) {
                 $categories[0][$row['tree_pos']] = $row;
             } else {
@@ -595,10 +614,10 @@ class CourseCategory
         $specialCourseList = CourseManager::get_special_course_list();
         $without_special_courses = '';
         if (!empty($specialCourseList)) {
-            $without_special_courses = ' AND course.id NOT IN ("'.implode('","', $specialCourseList).'")';
+            $without_special_courses = ' AND course.code NOT IN ("'.implode('","', $specialCourseList).'")';
         }
 
-        $visibilityCondition = CourseManager::getCourseVisibilitySQLCondition('course', true);
+        $visibilityCondition = CourseManager::getCourseVisibilitySQLCondition('course');
 
         $categoryFilter = '';
         if ($categoryCode === 'ALL') {
@@ -644,6 +663,7 @@ class CourseCategory
                     ";
             }
         }
+        logToFile('', $sql);
 
         return Database::num_rows(Database::query($sql));
     }
@@ -661,9 +681,9 @@ class CourseCategory
         $specialCourseList = CourseManager::get_special_course_list();
         $without_special_courses = '';
         if (!empty($specialCourseList)) {
-            $without_special_courses = ' AND course.id NOT IN ("'.implode('","', $specialCourseList).'")';
+            $without_special_courses = ' AND course.code NOT IN ("'.implode('","', $specialCourseList).'")';
         }
-        $visibilityCondition = CourseManager::getCourseVisibilitySQLCondition('course', true);
+        $visibilityCondition = CourseManager::getCourseVisibilitySQLCondition("course");
 
         if (!empty($random_value)) {
             $random_value = intval($random_value);

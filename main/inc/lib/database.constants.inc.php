@@ -2,18 +2,28 @@
 /* For licensing terms, see /license.txt */
 
 /**
- *	Database constants definition for Chamilo
+ *  Database constants definition for Chamilo
  *  This file is called by database.lib.php
  *
  *  @todo the table constants have all to start with TABLE_
  *  This is because of the analogy with the tool constants TOOL_
  *
- *	@package chamilo.library
+ *  @package chamilo.library
  */
 
 //See #3910 defines the default prefix for the single course database
 // Modified by hubert.borderiou 2011-10-21 Add course category
 define('DB_COURSE_PREFIX', 'c_');
+
+//horaire
+// Francois Belisle Kezber.
+// Those tables were missing from the constants but are still being used in the code.
+// imported those 4 lines from v1.9
+define ('TABLE_CAL_DATE','cal_dates');
+define ('TABLE_CAL_HORAIRE','cal_horaire');
+define ('TABLE_CAL_TEMP','cal_temp');
+define ('TABLE_STATISTIC_TRACK_E_EXERCICES_TEMP','track_e_exercices_temp');
+
 
 // Main database tables
 define('TABLE_MAIN_COURSE', 'course');

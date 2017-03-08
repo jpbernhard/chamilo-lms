@@ -25,7 +25,7 @@ if ($lp_controller_touched != 1) {
     exit;
 }
 
-require_once __DIR__.'/../inc/global.inc.php';
+require_once '../inc/global.inc.php';
 //To prevent the template class
 $show_learnpath = true;
 
@@ -62,7 +62,7 @@ if (empty($_SESSION['oLP'])) {
     api_not_allowed(true);
 }
 
-$debug = 0;
+$debug = 1;
 
 if ($debug) {
     error_log('------ Entering lp_view.php -------');
@@ -110,7 +110,6 @@ $(document).ready(function() {
 });
 var chamilo_xajax_handler = window.oxajax;
 </script>';
-
 if ($_SESSION['oLP']->mode == 'embedframe' || $_SESSION['oLP']->get_hide_toc_frame() == 1) {
     $htmlHeadXtra[] = '';
 }
@@ -266,6 +265,8 @@ if (
         $sql = 'SELECT start_date, exe_date, exe_result, exe_weighting, exe_exo_id
                 FROM ' . $TBL_TRACK_EXERCICES . '
                 WHERE exe_id = ' . $safe_exe_id;
+
+
         $res = Database::query($sql);
         $row_dates = Database::fetch_array($res);
 
@@ -533,7 +534,7 @@ $template->assign(
 
 $template->assign('lp_author', $_SESSION['oLP']->get_author());
 $template->assign('lp_mode', $_SESSION['oLP']->mode);
-$template->assign('lp_title_scorm', $_SESSION['oLP']->name);
+$template->assign('lp_title_scorm',$_SESSION['oLP']->name);
 $template->assign(
     'lp_html_toc',
     $_SESSION['oLP']->get_html_toc($get_toc_list)
