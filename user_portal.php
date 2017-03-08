@@ -1,6 +1,6 @@
 <?php
 /* For licensing terms, see /license.txt */
-die('TESTING');
+
 use ChamiloSession as Session;
 
 /**
