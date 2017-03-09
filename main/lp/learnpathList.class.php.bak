@@ -7,9 +7,9 @@ use Chamilo\CourseBundle\Entity\CLp;
  * Class LearnpathList
  * This class is only a learning path list container with several practical methods for sorting the list and
  * provide links to specific paths
- * @uses	Database.lib.php to use the database
- * @uses	learnpath.class.php to generate learnpath objects to get in the list
- * @author	Yannick Warnier <ywarnier@beeznest.org>
+ * @uses    Database.lib.php to use the database
+ * @uses    learnpath.class.php to generate learnpath objects to get in the list
+ * @author  Yannick Warnier <ywarnier@beeznest.org>
  *
  */
 class LearnpathList
@@ -28,15 +28,15 @@ class LearnpathList
      * This method is the constructor for the learnpathList. It gets a list of available learning paths from
      * the database and creates the learnpath objects. This list depends on the user that is connected
      * (only displays) items if he has enough permissions to view them.
-     * @param	integer	$user_id
-     * @param	string	$course_code Optional course code (otherwise we use api_get_course_id())
-     * @param   int		$session_id Optional session id (otherwise we use api_get_session_id())
+     * @param   integer $user_id
+     * @param   string  $course_code Optional course code (otherwise we use api_get_course_id())
+     * @param   int     $session_id Optional session id (otherwise we use api_get_session_id())
      * @param   string  $order_by
      * @param   string  $check_publication_dates
      * @param   int     $categoryId
      * @param bool $ignoreCategoryFilter
      *
-     * @return	void
+     * @return  void
      */
     public function __construct(
         $user_id,
@@ -48,13 +48,16 @@ class LearnpathList
         $ignoreCategoryFilter = false
     ) {
         $course_info = api_get_course_info($course_code);
+        $lp_table = Database::get_course_table(TABLE_LP_MAIN);
         $tbl_tool = Database::get_course_table(TABLE_TOOL_LIST);
 
         $this->course_code = $course_code;
         $this->user_id = $user_id;
+
         $course_id = $course_info['real_id'];
 
         if (empty($course_id)) {
+
             return false;
         }
 
@@ -65,12 +68,7 @@ class LearnpathList
             $session_id = api_get_session_id();
         }
 
-        $condition_session = api_get_session_condition(
-            $session_id,
-            true,
-            true,
-            'lp.sessionId'
-        );
+        $condition_session = api_get_session_condition($session_id, true, true, 'lp.sessionId');
 
         $order = "ORDER BY lp.displayOrder ASC, lp.name ASC";
         if (isset($order_by)) {
@@ -106,37 +104,39 @@ class LearnpathList
                     $condition_session
                     $categoryFilter
                     $order
-                ";
+               ";
+
 
         $learningPaths = Database::getManager()
             ->createQuery($dql)
             ->getResult();
+        $names = array();
 
-        $names = [];
         /** @var CLp $row */
         foreach ($learningPaths as $row) {
+
+
+
+
             // Use domesticate here instead of Database::escape_string because
             // it prevents ' to be slashed and the input (done by learnpath.class.php::toggle_visibility())
             // is done using domesticate()
-            $name = domesticate($row->getName());
-            $link = 'lp/lp_controller.php?action=view&lp_id=' . $row->getId() . '&id_session='.$session_id;
-            $oldLink = 'newscorm/lp_controller.php?action=view&lp_id=' . $row->getId() . '&id_session='.$session_id;
+            $myname = domesticate($row->getName());
+            $mylink = 'lp/lp_controller.php?action=view&lp_id=' . $row->getIid() . '&id_session='.$session_id;
 
             $sql2 = "SELECT * FROM $tbl_tool
                      WHERE
-                        c_id = $course_id AND 
-                        name = '$name' AND
-                        image = 'scormbuilder.gif' AND
-                        (
-                            link LIKE '$link%' OR
-                            link LIKE '$oldLink%'                                
-                        )
-                      ";
+                        c_id = $course_id AND (
+                            name='$myname' AND
+                            image='scormbuilder.gif' AND
+                            link LIKE '$mylink%'
+                      )";
+
             $res2 = Database::query($sql2);
+
             if (Database::num_rows($res2) > 0) {
                 $row2 = Database::fetch_array($res2);
                 $pub = $row2['visibility'];
-
             } else {
                 $pub = 'i';
             }
@@ -184,12 +184,11 @@ class LearnpathList
                 'expired_on' => $row->getExpiredOn() ? $row->getExpiredOn()->format('Y-m-d H:i:s') : null,
                 //'category_id'       => $row['category_id'],
                 'subscribe_users' => $row->getSubscribeUsers(),
-                'lp_old_id' => $row->getId(),
-                //'iid' => $row->getIid(),
-                'prerequisite' => $row->getPrerequisite()
+                'lp_old_id' => $row->getId()
             );
             $names[$row->getName()] = $row->getIid();
         }
+
 
         $this->alpha_list = asort($names);
     }
@@ -197,7 +196,7 @@ class LearnpathList
     /**
      * Gets references to learnpaths for all learnpaths IDs kept in the local list.
      * This applies a transformation internally on list and ref_list and returns a copy of the refs list
-     * @return	array	List of references to learnpath objects
+     * @return  array   List of references to learnpath objects
      */
     public function get_refs()
     {
@@ -210,7 +209,7 @@ class LearnpathList
 
     /**
      * Gets a table of the different learnpaths we have at the moment
-     * @return	array	Learnpath info as [lp_id] => ([lp_type]=> ..., [lp_name]=>...,[lp_desc]=>...,[lp_path]=>...)
+     * @return  array   Learnpath info as [lp_id] => ([lp_type]=> ..., [lp_name]=>...,[lp_desc]=>...,[lp_path]=>...)
      */
     public function get_flat_list()
     {
