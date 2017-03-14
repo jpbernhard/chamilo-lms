@@ -54,25 +54,25 @@ function plus_repeated_event() {
 $htmlHeadXtra[] = '<script>
 var counter_image = 1;
 function add_image_form() {
-	// Multiple filepaths for image form
-	var filepaths = document.getElementById("filepaths");
-	if (document.getElementById("filepath_"+counter_image)) {
-		counter_image = counter_image + 1;
-	}  else {
-		counter_image = counter_image;
-	}
-	var elem1 = document.createElement("div");
-	elem1.setAttribute("id","filepath_"+counter_image);
-	filepaths.appendChild(elem1);
-	id_elem1 = "filepath_"+counter_image;
-	id_elem1 = "\'"+id_elem1+"\'";
-	document.getElementById("filepath_"+counter_image).innerHTML = "<input type=\"file\" name=\"attach_"+counter_image+"\" />&nbsp; <br />'.get_lang('Description').'&nbsp;&nbsp;<input type=\"text\" name=\"legend[]\"  /><br /><br />";
-	if (filepaths.childNodes.length == 6) {
-		var link_attach = document.getElementById("link-more-attach");
-		if (link_attach) {
-			link_attach.innerHTML="";
-		}
-	}
+    // Multiple filepaths for image form
+    var filepaths = document.getElementById("filepaths");
+    if (document.getElementById("filepath_"+counter_image)) {
+        counter_image = counter_image + 1;
+    }  else {
+        counter_image = counter_image;
+    }
+    var elem1 = document.createElement("div");
+    elem1.setAttribute("id","filepath_"+counter_image);
+    filepaths.appendChild(elem1);
+    id_elem1 = "filepath_"+counter_image;
+    id_elem1 = "\'"+id_elem1+"\'";
+    document.getElementById("filepath_"+counter_image).innerHTML = "<input type=\"file\" name=\"attach_"+counter_image+"\" />&nbsp; <br />'.get_lang('Description').'&nbsp;&nbsp;<input type=\"text\" name=\"legend[]\"  /><br /><br />";
+    if (filepaths.childNodes.length == 6) {
+        var link_attach = document.getElementById("link-more-attach");
+        if (link_attach) {
+            link_attach.innerHTML="";
+        }
+    }
 }
 </script>';
 
@@ -164,6 +164,7 @@ if ($allowToEdit) {
         case 'edit':
             $actionName = get_lang('Edit');
             $event = $agenda->get_event($eventId);
+            $sendEmail = isset($values['add_announcement']) ? true : false;
 
             if (empty($event)) {
                 api_not_allowed(true);
@@ -200,7 +201,7 @@ if ($allowToEdit) {
                         $values['title'],
                         $values['content'],
                         $values['users_to_send'],
-                        false,
+                        $sendEmail,
                         null,
                         $attachmentList,
                         $attachmentCommentList,
@@ -254,6 +255,12 @@ if ($allowToEdit) {
                 }
 
                 $message = Display::return_message(get_lang('Updated'), 'confirmation');
+                if ($sendEmail) {
+                    $message .= Display::return_message(
+                        get_lang('AdditionalMailWasSentToSelectedUsers'),
+                        'confirmation'
+                    );
+                }
                 Display::addFlash($message);
                 header("Location: $agendaUrl");
                 exit;

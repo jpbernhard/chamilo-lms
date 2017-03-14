@@ -6,7 +6,7 @@
  * a list of users in the group, subscribe or unsubscribe option, tutors...
  *
  * @package chamilo.group
- * @todo	Display error message if no group ID specified
+ * @todo    Display error message if no group ID specified
  */
 
 require_once __DIR__.'/../inc/global.inc.php';
@@ -15,11 +15,11 @@ $current_course_tool  = TOOL_GROUP;
 // Notice for unauthorized people.
 api_protect_course_script(true);
 
-/*	Libraries & config files */
+/*  Libraries & config files */
 require_once api_get_path(SYS_CODE_PATH).'forum/forumfunction.inc.php';
 require_once api_get_path(SYS_CODE_PATH).'forum/forumconfig.inc.php';
 
-/*	MAIN CODE */
+/*  MAIN CODE */
 $group_id = api_get_group_id();
 $user_id = api_get_user_id();
 $current_group = GroupManager::get_group_properties($group_id);
@@ -31,7 +31,7 @@ $this_section = SECTION_COURSES;
 $nameTools = get_lang('GroupSpace');
 $interbreadcrumb[] = array('url' => 'group.php?'.api_get_cidreq(), 'name' => get_lang('Groups'));
 
-/*	Ensure all private groups // Juan Carlos Raña Trabado */
+/*  Ensure all private groups // Juan Carlos Raña Trabado */
 
 $forums_of_groups = get_forums_of_group($current_group['iid']);
 
@@ -41,10 +41,10 @@ if (!GroupManager::userHasAccessToBrowse($user_id, $current_group, api_get_sessi
 
 Display::display_header($nameTools.' '.Security::remove_XSS($current_group['name']), 'Group');
 
-/*	Introduction section (editable by course admin) */
+/*  Introduction section (editable by course admin) */
 Display::display_introduction_section(TOOL_GROUP);
 
-/*	Actions and Action links */
+/*  Actions and Action links */
 
 /*
  * User wants to register in this group
@@ -90,7 +90,7 @@ if (GroupManager :: is_self_unregistration_allowed($user_id, $current_group['iid
 }
 echo '&nbsp;</div>';
 
-/*	Main Display Area */
+/*  Main Display Area */
 
 $edit_url = '';
 if (api_is_allowed_to_edit(false, true) ||
@@ -418,6 +418,8 @@ function get_group_user_data($from, $number_of_items, $column, $direction)
     $groupInfo = GroupManager::get_group_properties(api_get_group_id());
     $course_id = api_get_course_int_id();
 
+
+
     if (empty($groupInfo) || empty($course_id)) {
         return 0;
     }
@@ -428,21 +430,21 @@ function get_group_user_data($from, $number_of_items, $column, $direction)
 
     // Query
     if (api_get_setting('show_email_addresses') === 'true') {
-        $sql = "SELECT user.id 	AS col0,
-				".(api_is_western_name_order() ?
-                "user.firstname 	AS col1,
-				user.lastname 	AS col2,"
+        $sql = "SELECT user.id  AS col0,
+                ".(api_is_western_name_order() ?
+                "user.firstname     AS col1,
+                user.lastname   AS col2,"
                 :
-                "user.lastname 	AS col1,
-				user.firstname 	AS col2,"
+                "user.lastname  AS col1,
+                user.firstname  AS col2,"
             )."
-				user.email		AS col3
-				FROM $table_user user, 
-				$table_group_user group_rel_user
-				WHERE 
-				    group_rel_user.c_id = $course_id AND 
-				    group_rel_user.user_id = user.id AND 
-				    group_rel_user.group_id = '".$groupInfo['iid']."'
+                user.email      AS col3
+                FROM $table_user user, 
+                $table_group_user group_rel_user
+                WHERE 
+                    group_rel_user.c_id = $course_id AND 
+                    group_rel_user.user_id = user.id AND 
+                    group_rel_user.group_id = '".$groupInfo['iid']."'
                 ORDER BY col$column $direction 
                 LIMIT $from, $number_of_items";
     } else {
@@ -450,12 +452,12 @@ function get_group_user_data($from, $number_of_items, $column, $direction)
             $sql = "SELECT DISTINCT
                         u.id AS col0,
                         ".(api_is_western_name_order() ?
-                        "u.firstname 	AS col1,
-                            u.lastname 	AS col2,"
+                        "u.firstname    AS col1,
+                            u.lastname  AS col2,"
                         :
-                        "u.lastname 	AS col1,
-                        u.firstname 	AS col2,")."
-                        u.email		AS col3
+                        "u.lastname     AS col1,
+                        u.firstname     AS col2,")."
+                        u.email     AS col3
                     FROM $table_user u 
                     INNER JOIN $table_group_user gu 
                     ON (gu.user_id = u.id) AND gu.c_id = $course_id
@@ -464,13 +466,13 @@ function get_group_user_data($from, $number_of_items, $column, $direction)
                     LIMIT $from, $number_of_items";
         } else {
             $sql = "SELECT DISTINCT
-						user.id 	AS col0,
-						". (api_is_western_name_order() ?
-                    "user.firstname 	AS col1,
-						user.lastname 	AS col2 "
+                        user.id     AS col0,
+                        ". (api_is_western_name_order() ?
+                    "user.firstname     AS col1,
+                        user.lastname   AS col2 "
                     :
-                    "user.lastname 	AS col1,
-						user.firstname 	AS col2 "
+                    "user.lastname  AS col1,
+                        user.firstname  AS col2 "
                     )."
                     FROM $table_user user, $table_group_user group_rel_user
                     WHERE 

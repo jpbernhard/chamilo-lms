@@ -434,9 +434,9 @@ define('GROUP_TITLE_LENGTH', 50);
 define('ALL_ON_ONE_PAGE', 1);
 define('ONE_PER_PAGE', 2);
 
-define('EXERCISE_FEEDBACK_TYPE_END', 0); //Feedback 		 - show score and expected answers
+define('EXERCISE_FEEDBACK_TYPE_END', 0); //Feedback          - show score and expected answers
 define('EXERCISE_FEEDBACK_TYPE_DIRECT', 1); //DirectFeedback - Do not show score nor answers
-define('EXERCISE_FEEDBACK_TYPE_EXAM', 2); //NoFeedback 	 - Show score only
+define('EXERCISE_FEEDBACK_TYPE_EXAM', 2); //NoFeedback   - Show score only
 
 define('RESULT_DISABLE_SHOW_SCORE_AND_EXPECTED_ANSWERS', 0); //show score and expected answers
 define('RESULT_DISABLE_NO_SCORE_AND_EXPECTED_ANSWERS', 1); //Do not show score nor answers
@@ -962,6 +962,15 @@ function api_is_facebook_auth_activated() {
     global $_configuration;
     return (isset($_configuration['facebook_auth']) && $_configuration['facebook_auth'] == 1);
 }
+
+/**
+ * @deprecated 28-SEP-2009: Use Database::query($query, $file, $line) instead.
+ */
+function api_sql_query($query, $file = '', $line = 0) {
+    return Database::query($query, $file, $line);
+}
+
+
 
 /**
  * This function checks whether a given path points inside the system.

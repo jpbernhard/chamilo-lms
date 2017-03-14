@@ -2208,6 +2208,7 @@ function get_work_user_list(
                     } else {
                         //$action .= Display::return_icon('edit_na.png', get_lang('Modify'), array(), ICON_SIZE_SMALL);
                     }
+
                 } else {
                     $action .= '<a href="'.$url.'view.php?'.api_get_cidreq().'&id='.$item_id.'" title="'.get_lang('View').'">'.
                         Display::return_icon('default.png', get_lang('View'), array(), ICON_SIZE_SMALL).'</a>';

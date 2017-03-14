@@ -335,7 +335,6 @@ class SortableTable extends HTML_Table
                 $html .= '</form>';
             }
         }
-
         return '<div class="table-responsive">' . $html . '</div>';
     }
 
@@ -574,10 +573,12 @@ class SortableTable extends HTML_Table
         $offset = $pager->getOffsetByPageId();
         $from = $offset[0] - 1;
 
+     //   echo '<h1>html BEFORE : </h1>' . $this->toHTML();
         $table_data = $this->get_table_data($from);
 
         $this->processHeaders();
 
+     //   echo '<h1>html after processHeaders : </h1>' . $this->toHTML();
         if (is_array($table_data)) {
             $count = 1;
             foreach ($table_data as & $row) {
@@ -613,6 +614,9 @@ class SortableTable extends HTML_Table
         foreach ($this->td_attributes as $column => $attributes) {
             $this->setColAttributes($column, $attributes);
         }
+
+
+    //    echo '<h1>html : </h1>' . $this->toHTML();
 
         return $this->toHTML();
     }

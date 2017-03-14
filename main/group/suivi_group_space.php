@@ -123,7 +123,6 @@ echo '</div>';
 
 
 
-
 $table = new SortableTable('group_users', 'get_number_of_group_users', 'get_group_user_data', (api_is_western_name_order() xor api_sort_by_first_name()) ? 2 : 1);
 //$table -> display();  
 //echo("Test");
@@ -187,6 +186,32 @@ $current_group = Database::fetch_assoc($current_group_result)['iid'];
                   " ;
 //echo($sql);
     $result =  api_sql_query($sql,__FILE__,__LINE__);
+
+// Francois Belisle Kezber
+//  Le TableDisplay contient une fonction qui set les headers... les headers sont placés dans la Row 0... Ce qui ecrase le contenue
+// le la vrai row 0... Il faut donc ajouter un empty record a la row 0 qui se fera ecrasé par lesh headers plutot que le premier record
+// en ajoutant un empty record, ca fonctionne, mais il faut trouver pourquoi les headers ecrasent le premier record
+ $row = array();
+
+            $row[] = $student_datas['official_code'];
+            $row[] = $student_datas['lastname'];
+            $row[] = $student_datas['firstname'];
+            $row[] = substr_replace($exampass,'','0','2');
+            $row[] = $last_connection_date;
+            $row[] = $time_tot;
+            $row[] =  $Total ; 
+            $row[] =  '<center>'.$sing.''.$diff.'&nbsp;'.$Days.''.$avertissement.'</font></b></center>';
+            $row[] = '<center><a  target="_blank" href="save_diff.php?student='.$user_in_groupe.'&diff='.$ajout.''.$diff.'"><img src="'.api_get_path(WEB_IMG_PATH).'addd.gif" border="0" /></a></center>';
+            $row[] = '<center><a target="_blank" href="suivi_myagenda.php?user_id='.$user_in_groupe.'&action=view&view=personal&firstname='.$student_datas['firstname'].'&name='.$student_datas['lastname'].'"><img src="'.api_get_path(WEB_IMG_PATH).'calendar_week.gif" border="0" /></a></center>';
+            $row[] = '<center><a target="_blank" href="../mySpace/myStudents.php?student='.$user_in_groupe.'"><img src="'.api_get_path(WEB_IMG_PATH).'2rightarrow.gif" border="0" /></a></center>';
+        $all_datas[] = $row;    
+
+ foreach ($all_datas as $row) {
+            $table -> addRow($row);
+            }
+
+
+
 
 while($resulta = Database::fetch_array($result))
 {

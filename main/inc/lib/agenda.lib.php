@@ -2204,14 +2204,15 @@ class Agenda
             $form->addElement('textarea', 'file_comment', get_lang('FileComment'));
         }
 
-        if (empty($id)) {
+//        die('here');
+//        if (empty($id)) {
             $form->addElement(
                 'checkbox',
                 'add_announcement',
                 null,
                 get_lang('AddAnnouncement').'&nbsp('.get_lang('SendMail').')'
             );
-        }
+//        }
 
         if ($id) {
             $form->addButtonUpdate(get_lang('ModifyEvent'));

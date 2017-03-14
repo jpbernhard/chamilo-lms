@@ -19,7 +19,7 @@ $use_anonymous = true;
 // setting the global file that gets the general configuration, the databases, the languages, ...
 require_once __DIR__.'/../inc/global.inc.php';
 
-/*	Sessions */
+/*  Sessions */
 
 $ctok = Security::get_existing_token();
 $stok = Security::get_token();
@@ -80,7 +80,7 @@ if (!empty($group_id)) {
 
 api_protect_course_group(GroupManager::GROUP_TOOL_ANNOUNCEMENT);
 
-/*	Tracking	*/
+/*  Tracking    */
 Event::event_access_tool(TOOL_ANNOUNCEMENT);
 
 $announcement_id = isset($_GET['id']) ? intval($_GET['id']) : null;
@@ -122,6 +122,7 @@ switch ($action) {
                         itemproperty.tool = '".TOOL_ANNOUNCEMENT."'  AND
                         itemproperty.visibility <> 2
                     ORDER BY display_order $sortDirection";
+                    echo '<h1>' . $sql . '</h1>';
             $result = Database::query($sql);
             $thisAnnouncementOrderFound = false;
             $thisAnnouncementOrder = null;
@@ -525,7 +526,7 @@ switch ($action) {
                         $sendToUsersInSession
                     );
 
-                    /*		MAIL FUNCTION	*/
+                    /*      MAIL FUNCTION   */
                     if (isset($_POST['email_ann']) && empty($_POST['onlyThoseMails'])) {
                         AnnouncementManager::sendEmail(
                             api_get_course_info(),
