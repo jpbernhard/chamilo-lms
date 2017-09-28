@@ -730,6 +730,9 @@ class Template
         foreach ($js_files as $file) {
             $js_file_to_string .= api_get_js($file);
         }
+        
+        // Adding Browsaloud javascript include
+        $js_file_to_string .= '<script type="text/javascript" src="//www.browsealoud.com/plus/scripts/ba.js"></script>'."\n";
 
         // Loading email_editor js
         if (!api_is_anonymous() && api_get_setting('allow_email_editor') == 'true') {
